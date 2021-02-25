@@ -1,0 +1,43 @@
+# -*- coding: utf-8 -*-
+""" Models for the {{app_name}} application. """
+# standard library
+
+# django
+from django.core.urlresolvers import reverse
+from django.db import models
+from django.utils.translation import ugettext_lazy as _
+
+# models
+from base.models import BaseModel
+from users.models import User
+
+
+class {{camel_case_app_name|slice:":-1"}}(BaseModel):
+    # foreign keys
+    user = models.ForeignKey(
+        User,
+        verbose_name=_('user'),
+    )
+    # required fields
+    name = models.CharField(
+        _('name'),
+        max_length=30,
+        blank=True,
+    )
+    # optional fields
+
+    class Meta:
+        verbose_name = _('{{app_name|slice:":-1"}}')
+        verbose_name_plural = _('{{app_name}}')
+        permissions = (
+            ('view_{{app_name|slice:":-1"}}', _('Can view {{app_name}}')),
+        )
+
+    def __str__(self):
+        # TODO this is an example str return, change it
+        return self.name
+
+    def get_absolute_url(self):
+        """ Returns the canonical URL for the {{app_name|slice:":-1"}} object """
+        # TODO this is an example, change it
+        return reverse('{{app_name|slice:":-1"}}_detail', args=(self.pk,))

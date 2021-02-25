@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+
+DEBUG = True
+
+# Database
+# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
+LOCAL_DATABASES = {
+    'default': {
+        # engines: 'postgresql', 'mysql', 'sqlite3' or 'oracle'
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'database-name',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    }
+}
+
+LOCALLY_INSTALLED_APPS = [
+]
+
+ENABLE_EMAILS = True
