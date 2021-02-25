@@ -1,0 +1,73 @@
+- name: initial checks
+  hosts: all
+  gather_facts: no
+  pre_tasks:
+    - name: import check Ansible version task
+      import_tasks: utils/assert-ansible-version.yaml
+
+  tasks:
+    - name: check that ansible_limit is defined
+      assert:
+        that: ansible_limit is defined
+        fail_msg: Please explicitly limit the hosts you want to target with --limit
+        quiet: yes
+      # This prevents "ERROR! 'ansible_limit' is undefined" later.
+
+    - name: assert that DEBUG = True
+      command: >
+        pipenv run python -c
+        "from project.local_settings import DEBUG;
+        print(DEBUG)"
+      args:
+        chdir: "{{ server_root_dir }}"
+      changed_when: false
+      register: debug_enabled
+      failed_when: debug_enabled.stdout != 'True'
+
+- name: confirm
+  hosts: all
+  gather_facts: no
+  vars_prompt:
+    - name: confirmation
+      prompt: >-
+        Are you sure you want to reset the DB of "{{ ansible_limit }}"
+        ({{ lookup('env', 'PWD') | dirname | basename }}) [y/N]?
+      private: no   # Show input (this is made to input passwords)
+  tasks:
+    - name: check confirmation
+      assert:
+        that: confirmation | lower == 'y'
+        fail_msg: Confirmation failed.
+        quiet: yes
+
+- name: backup-drop-create
+  hosts: all
+  roles:
+    - get-db-config
+  tasks:
+    - name: check if DB exists
+      include_role:
+        name: db
+        tasks_from: check-existence
+
+    - name: backup DB
+      import_role:
+        name: db
+        tasks_from: backup
+      when: db_exists.stdout == '1'
+
+    - name: drop and create DB
+      postgresql_db:
+        name: "{{ db_conf.NAME }}"
+        login_user: "{{ db_conf.USER }}"
+        login_password: "{{ db_conf.PASSWORD }}"
+        login_host: "{{ db_conf.HOST }}"
+        login_port: "{{ (db_conf.PORT | int) if db_conf.PORT else omit }}"
+
+        state: "{{ item }}"
+      loop:
+        - absent
+        - present
+
+- name: migrate
+  import_playbook: migrate-db.yaml
