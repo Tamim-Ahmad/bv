@@ -1,0 +1,63 @@
+extends base.pug
+
+- load static
+
+block javascripts
+  script(src="{% static 'js/status.js' %}")
+
+block content
+  table.table.table-bordered.table-hover
+    tbody
+
+      tr
+        th Google Analytics
+        td
+          if settings.GOOGLE_ANALYTICS_CODE
+            i.fa.fa-check.text-success
+              |  
+            | Ready ({{settings.GOOGLE_ANALYTICS_CODE}})
+          else
+            i.fa.fa-times.text-danger
+              |  
+            | Not set
+
+      tr
+        th RECAPTCHA
+        if settings.RECAPTCHA_PUBLIC_KEY
+          td
+            i.fa.fa-check.text-success
+              |  
+            | Ready ({{settings.RECAPTCHA_PUBLIC_KEY}})
+        else
+          td.table-danger
+            i.fa.fa-times.text-danger
+              |  
+            | Not set
+            a(href="https://www.google.com/recaptcha/admin", target="_blank")
+              | Get one
+
+      tr
+        th Favicon
+        td
+          .favicon-not-ok.d-none
+            i.fa.fa-times.text-danger
+              |  
+            | Favicon missing
+          .favicon-ok.d-none
+            i.fa.fa-check.text-success
+              |  
+            | Ready 
+            span.favicon-href
+
+      tr
+        th DEBUG
+        if settings.DEBUG
+          td
+            i.fa.fa-check.text-success
+              |  
+            | False
+        else
+          td.table-danger
+            i.fa.fa-times.text-danger
+              |  
+            | True
